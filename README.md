@@ -9,6 +9,9 @@ A cutting-edge, fully local, Privacy-Preserving Agentic Retrieval-Augmented Gene
 - [Nikhil Sharma](https://in.linkedin.com/in/nikhilsharmabph)
 - [Puja Chatterjee](https://in.linkedin.com/in/puja-chatterjee)
 
+## 🗄️ Dataset / Data Source
+In compliance with the hackathon evaluation criteria, this application natively utilizes **Open Government Datasets & Publicly Available Documents**, specifically demonstrating retrieval over Agricultural Service Portals (e.g., India Gov Services Agriculture policies). The system allows arbitrary unstructured multimodal files (PDF, DOCX, CSV) to be securely ingested and queried securely and locally to build proprietary or open intelligence bases.
+
 ## 🚀 Overview
 RAG-X-Thon is a powerful Full-Stack application comprising an **Angular** frontend and a **FastAPI/Python** backend. It leverages `langchain-chroma` and locally-hosted Ollama models (`qwen3-vl:4b` and `nomic-embed-text`) to perform deep, multi-modal semantic searches over user-uploaded documents without sending any data to third-party endpoints. 
 

@@ -15,7 +15,7 @@ Upon launching the application (`http://localhost:4200`), users are greeted by t
 ## 2. Multi-Modal Document Ingestion
 Once a folder is selected, the left-hand column unveils the upload utility. 
 Users can drop PDFs, Word Documents, Excel sheets, and Scanned Images directly into the UI.
-- **Behind the scenes:** FastAPI catches the payload, segments it, utilizes local `nomic-embed-text` to generate vector embeddings, and stores them in ChromaDB. 
+- **Behind the scenes:** FastAPI catches the payload, segments it, utilizes local `qwen3-embedding:4b` to generate vector embeddings, and stores them in ChromaDB. 
 
 ![Upload & Context Initialized](images/user_ss_2.png)
 
