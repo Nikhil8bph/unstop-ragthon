@@ -1,0 +1,150 @@
+<div class="container-fluid p-0 vh-100 d-flex overflow-hidden" style="background:#0a0a12;">
+  <!-- Sidebar -->
+  <aside class="flex-shrink-0 h-100 border-end border-secondary" style="width:260px; z-index:100; background:#0f0f1a;">
+    <app-sidebar 
+      (projectSelected)="onProjectSelected($event)" 
+      (folderSelected)="onFolderSelected($event)"
+      (fileSelected)="onFileSelected($event)"
+      (openRename)="openRenameModal($event)"
+      (openDelete)="openDeleteModal($event)">
+    </app-sidebar>
+  </aside>
+
+  <!-- Main area -->
+  <main class="flex-grow-1 h-100 d-flex flex-column overflow-hidden">
+    <!-- Navigation Pane / Header -->
+    <header class="flex-shrink-0 d-flex align-items-center px-3 border-bottom border-secondary shadow-sm" style="height:56px; background:#0f0f1a;">
+      <div class="nav-pane d-flex align-items-center gap-2 overflow-auto no-scrollbar py-1">
+        
+        <a routerLink="/" class="nav-segment d-flex align-items-center px-3 py-1 rounded-pill text-decoration-none transition" 
+           [class.active-segment]="!selectedProject()">
+          <i class="bi bi-house-door me-2"></i>
+          <span class="x-small fw-bold tracking-widest text-uppercase">DASHBOARD</span>
+        </a>
+
+        <i *ngIf="selectedProject()" class="bi bi-chevron-right text-secondary small opacity-25 mx-1"></i>
+
+        <a *ngIf="selectedProject()" 
+           [routerLink]="['/project', selectedProject()?.id]" 
+           class="nav-segment d-flex align-items-center px-3 py-1 rounded-pill text-decoration-none transition"
+           [class.active-segment]="selectedProject() && !selectedFolder()">
+          <i class="bi bi-kanban me-2"></i>
+          <span class="small text-uppercase fw-semibold">{{ selectedProject()?.name }}</span>
+        </a>
+
+        <i *ngIf="selectedFolder()" class="bi bi-chevron-right text-secondary small opacity-25 mx-1"></i>
+
+        <a *ngIf="selectedFolder()" 
+           [routerLink]="['/project', selectedProject()?.id, 'folder', selectedFolder()?.id]" 
+           class="nav-segment d-flex align-items-center px-3 py-1 rounded-pill text-decoration-none transition"
+           [class.active-segment]="selectedFolder() && !selectedFile()">
+          <i class="bi bi-folder-fill me-2 text-warning"></i>
+          <span class="small text-uppercase fw-semibold">{{ selectedFolder()?.name }}</span>
+        </a>
+
+        <i *ngIf="selectedFile()" class="bi bi-chevron-right text-secondary small opacity-25 mx-1"></i>
+
+        <div *ngIf="selectedFile()" 
+             class="nav-segment d-flex align-items-center px-3 py-1 rounded-pill active-segment">
+          <i class="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>
+          <span class="small text-uppercase fw-bold text-info">{{ selectedFile()?.filename }}</span>
+        </div>
+      </div>
+
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <span class="badge rounded-pill px-3 py-2" style="background: rgba(13,202,240,0.1); border:1px solid rgba(13,202,240,0.3); color:#0dcaf0; font-size:0.7rem;">
+          <i class="bi bi-cpu-fill me-1"></i>QWEN3-VL
+        </span>
+      </div>
+    </header>
+
+    <!-- Split content area -->
+    <div class="flex-grow-1 d-flex overflow-hidden">
+      <!-- LEFT PANEL: Upload + Chat -->
+      <div class="d-flex flex-column overflow-hidden border-end border-secondary"
+           [style.width]="pdfUrl() ? '50%' : '100%'"
+           style="transition: width 0.3s ease; min-width: 0;">
+
+        <!-- Upload (compact, fixed height) -->
+        <div *ngIf="selectedFolder()" class="flex-shrink-0 border-bottom border-secondary" style="background:#0f0f1a;">
+          <app-upload [folder]="selectedFolder()" (uploadComplete)="onUploadComplete()"></app-upload>
+        </div>
+
+        <!-- Chat (fills remaining space) -->
+        <div class="flex-grow-1 overflow-hidden" style="min-height: 0;">
+          <app-chat [project]="selectedProject()" [folder]="selectedFolder()"></app-chat>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: PDF Viewer -->
+      <div *ngIf="pdfUrl()" class="flex-grow-1 h-100 overflow-hidden" style="min-width: 0;">
+        <app-pdf-viewer 
+          [src]="pdfUrl()" 
+          [filename]="selectedFile()?.filename"
+          [page]="pdfPage()"
+          (close)="closePdf()">
+        </app-pdf-viewer>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive Modals -->
+  <div *ngIf="activeModal()" class="modal-overlay d-flex align-items-center justify-content-center" 
+       style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; backdrop-filter: blur(4px);">
+    
+    <div class="modal-content glass-card p-4 animate-scale shadow-lg border border-secondary" style="max-width: 420px; width: 95%;">
+      
+      <!-- Rename UI -->
+      <div *ngIf="activeModal()?.action === 'rename'">
+        <div class="d-flex align-items-center gap-2 mb-3">
+           <i class="bi bi-pencil-square text-info fs-4"></i>
+           <h5 class="text-white fw-bold m-0">Rename {{ activeModal()?.type | titlecase }}</h5>
+        </div>
+        <p class="text-secondary small mb-3">Assign a new name to your {{ activeModal()?.type }}. Existing links will remain active.</p>
+        
+        <div class="mb-4">
+          <label class="x-small text-uppercase fw-bold text-secondary mb-1">New Name</label>
+          <input type="text" [(ngModel)]="activeModal()!.newName" 
+                 class="form-control bg-dark text-white border-secondary focus-info shadow-none" 
+                 placeholder="Enter new name..." autofocus>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-2">
+          <button (click)="closeModal()" class="btn btn-dark border-secondary px-4">Cancel</button>
+          <button (click)="confirmModalAction()" class="btn px-4 fw-bold" style="background-color: #0dcaf0; color: #000; border: none;">Update Name</button>
+        </div>
+      </div>
+
+      <!-- Delete UI -->
+      <div *ngIf="activeModal()?.action === 'delete'">
+        <div class="d-flex align-items-center gap-2 mb-3">
+           <i class="bi bi-exclamation-triangle-fill text-danger fs-4"></i>
+           <h5 class="text-white fw-bold m-0">Confirm Deletion</h5>
+        </div>
+        
+        <div class="alert bg-danger bg-opacity-10 border-danger border-opacity-25 text-danger small mb-4 py-2">
+          <strong>Warning:</strong> This will permanently remove the {{ activeModal()?.type }} and all nested data.
+        </div>
+
+        <p class="text-light small mb-4">Are you sure you want to delete <span class="text-info fw-bold">{{ activeModal()?.item.name || activeModal()?.item.filename }}</span>?</p>
+        
+        <div class="d-flex justify-content-end gap-2">
+          <button (click)="closeModal()" class="btn btn-dark border-secondary px-4">Keep It</button>
+          <button (click)="confirmModalAction()" class="btn btn-danger px-4 fw-bold">Delete Forever</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .nav-segment { color: #666; border: 1px solid transparent; }
+  .nav-segment:hover { color: #0dcaf0; background: rgba(13,202,240,0.05); }
+  .active-segment { color: #0dcaf0 !important; background: rgba(13,202,240,0.08) !important; border-color: rgba(13,202,240,0.2) !important; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .animate-scale { animation: scaleIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .focus-info:focus { border-color: #0dcaf0 !important; }
+  .x-small { font-size: 0.65rem; }
+</style>

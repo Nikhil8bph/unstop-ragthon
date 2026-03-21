@@ -1,0 +1,133 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-sidebar h-100 border-end border-secondary" style="width: 250px;">
+  <div class="d-flex align-items-center justify-content-between mb-4 mt-2">
+    <div class="d-flex align-items-center gap-2">
+      <div class="logo-box bg-info rounded-3 p-2 d-flex align-items-center justify-content-center shadow-info">
+        <i class="bi bi-robot fs-4 text-white"></i>
+      </div>
+      <div class="d-flex flex-column" style="line-height:1.1;">
+        <span class="fs-5 fw-bold tracking-tight">RAG-X-Thon</span>
+        <span class="x-small text-info fw-normal tracking-widest mt-1">BY DEVMISTRI</span>
+      </div>
+    </div>
+    <button (click)="toggleProjectInput()" class="btn btn-sm btn-outline-secondary border-0 text-white hover-info transition">
+      <i class="bi" [class.bi-plus-lg]="!showProjectInput" [class.bi-x-lg]="showProjectInput"></i>
+    </button>
+  </div>
+
+  <div class="flex-grow-1 overflow-auto custom-scrollbar">
+    <!-- Projects Section -->
+    <div class="mb-4 pt-2">
+      <h6 class="text-uppercase text-secondary fw-bold small px-2 mb-3 tracking-widest opacity-50">Projects</h6>
+      
+      <!-- Inline Project Input -->
+      <div *ngIf="showProjectInput" class="px-2 mb-3 animate-slide-down">
+        <div class="input-group input-group-sm">
+          <input type="text" [(ngModel)]="newProjectName" class="form-control bg-dark text-white border-secondary glass-input" placeholder="New Project..." (keyup.enter)="confirmCreateProject()">
+          <button (click)="confirmCreateProject()" class="btn btn-info" type="button"><i class="bi bi-check-lg"></i></button>
+        </div>
+      </div>
+
+      <!-- Project List -->
+      <div class="list-group list-group-flush gap-1">
+        <div *ngFor="let p of projects()" class="project-item mb-1">
+          <div (click)="onSelectProject(p)" 
+               [class.active-item]="selectedProjectId === p.id"
+               class="d-flex align-items-center px-2 py-2 rounded-3 position-relative"
+               style="cursor: pointer;">
+            <i class="bi bi-folder2-open me-2 fs-6" [class.text-info]="selectedProjectId === p.id" [class.text-secondary]="selectedProjectId !== p.id"></i>
+            <span class="small fw-medium flex-grow-1 text-truncate" [class.text-info]="selectedProjectId === p.id" style="color: #c8c8d8;">{{ p.name }}</span>
+            
+            <div class="action-buttons d-flex gap-1">
+               <button (click)="renameProject($event, p)" class="btn btn-link btn-sm text-info p-0 px-1 hover-scale" title="Rename Project"><i class="bi bi-pencil"></i></button>
+               <button (click)="deleteProject($event, p)" class="btn btn-link btn-sm text-danger p-0 px-1 hover-scale" title="Delete Project"><i class="bi bi-trash3"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Folder Management Section -->
+    <div *ngIf="selectedProjectId" class="mb-4 border-top border-secondary pt-4 mt-3 animate-fade-in">
+      <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+        <h6 class="text-uppercase small mb-0 fw-bold text-info tracking-widest">MANAGEMENT</h6>
+        <button class="btn btn-sm btn-info rounded-circle shadow-info scale-in" (click)="toggleFolderInput()" title="Add New Folder">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </div>
+
+      <!-- Folder Creation Input -->
+      <div *ngIf="showFolderInput" class="px-2 mb-3 animate-slide-down">
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control bg-dark text-light border-info glass-input" 
+                 [(ngModel)]="newFolderName" (keyup.enter)="confirmCreateFolder()" placeholder="Folder name...">
+          <button class="btn btn-info" (click)="confirmCreateFolder()">
+            <i class="bi bi-check-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Folder List -->
+      <div class="list-group list-group-flush gap-1">
+        <div *ngFor="let f of folders()" class="folder-item mb-1">
+          <div [class.active-item]="selectedFolderId === f.id" 
+               (click)="onSelectFolder(f)"
+               class="d-flex align-items-center px-2 py-2 rounded-3 position-relative"
+               style="cursor: pointer;">
+            <i class="bi bi-folder2 me-2 fs-6 text-warning"></i>
+            <span class="small flex-grow-1 text-truncate" [class.text-info]="selectedFolderId === f.id" style="color: #c8c8d8;">{{ f.name }}</span>
+            
+            <div class="action-buttons d-flex gap-1">
+               <button (click)="renameFolder($event, f)" class="btn btn-link btn-sm text-info p-0 px-1 hover-scale" title="Rename Folder"><i class="bi bi-pencil"></i></button>
+               <button (click)="deleteFolder($event, f)" class="btn btn-link btn-sm text-danger p-0 px-1 hover-scale" title="Delete Folder"><i class="bi bi-trash3"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- File List Section -->
+    <div *ngIf="selectedFolderId" class="mb-4 border-top border-secondary pt-4 mt-3">
+      <div class="d-flex flex-column gap-1">
+        <h6 class="text-uppercase fw-bold small px-2 mb-2 tracking-widest" style="color:#555; font-size: 0.6rem;">Files</h6>
+        <div class="list-group list-group-flush gap-1">
+          <div *ngFor="let file of files()" class="file-item mb-1">
+            <div (click)="onSelectFile(file)" 
+                 [class.active-item]="selectedFileId === file.id"
+                 class="d-flex align-items-center px-2 py-2 rounded-2 position-relative"
+                 style="cursor: pointer;">
+              <i class="bi fs-6 me-2" 
+                 [class.bi-file-earmark-pdf]="file.original_format === 'pdf'" 
+                 [class.bi-file-earmark-word]="file.original_format === 'docx'"
+                 [class.bi-file-earmark-spreadsheet]="file.original_format === 'csv'"
+                 [class.bi-file-earmark-text]="file.original_format === 'txt' || file.original_format === 'md'"
+                 [class.bi-file-earmark-image]="file.original_format === 'png' || file.original_format === 'jpg'"
+                 [class.text-danger]="file.original_format === 'pdf'"
+                 [class.text-primary]="file.original_format === 'docx'"
+                 [class.text-success]="file.original_format === 'csv'"
+                 [class.text-info]="file.original_format === 'txt' || file.original_format === 'md'"
+                 [class.text-warning]="file.original_format === 'png' || file.original_format === 'jpg'"></i>
+              <span class="small flex-grow-1 text-truncate" [class.text-info]="selectedFileId === file.id" style="color: #c8c8d8;">{{ file.filename }}</span>
+              
+              <div class="action-buttons d-flex gap-1">
+                 <button (click)="renameFile($event, file)" class="btn btn-link btn-sm text-info p-0 px-1 hover-scale" title="Rename"><i class="bi bi-pencil"></i></button>
+                 <button (click)="deleteFile($event, file)" class="btn btn-link btn-sm text-danger p-0 px-1 hover-scale" title="Delete"><i class="bi bi-trash3"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-auto pt-3 border-top border-secondary text-center">
+    <p class="m-0 x-small tracking-widest fw-bold text-uppercase opacity-50 mb-2">Created By</p>
+    <div class="d-flex flex-column gap-1 align-items-center">
+      <a href="https://in.linkedin.com/in/nikhilsharmabph" target="_blank" class="text-decoration-none small text-light hover-info d-flex align-items-center gap-2 transition" style="font-size: 0.75rem;">
+        <i class="bi bi-linkedin text-info"></i> Nikhil Sharma
+      </a>
+      <a href="https://in.linkedin.com/in/puja-chatterjee" target="_blank" class="text-decoration-none small text-light hover-info d-flex align-items-center gap-2 transition" style="font-size: 0.75rem;">
+        <i class="bi bi-linkedin text-info"></i> Puja Chatterjee
+      </a>
+    </div>
+  </div>
+</div>

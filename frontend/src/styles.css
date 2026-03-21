@@ -1,0 +1,271 @@
+/* Import Bootstrap and Bootstrap Icons */
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* =====================
+   GLOBAL RESET & BASE
+   ===================== */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background-color: #0a0a0f;
+  color: #e0e0e0;
+}
+
+/* =====================
+   COLOR VARIABLES
+   ===================== */
+:root {
+  --bg-sidebar: #0f0f1a;
+  --bg-dark: #12121e;
+  --bg-card: rgba(255,255,255,0.04);
+  --border-color: rgba(255,255,255,0.08);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b0;
+  --hover-bg: rgba(13, 202, 240, 0.1);
+  --active-bg: rgba(13, 202, 240, 0.15);
+  --active-text: #0dcaf0;
+  --shadow-glow: 0 0 15px rgba(13, 202, 240, 0.15);
+}
+
+/* =====================
+   SIDEBAR
+   ===================== */
+.bg-sidebar, [class*="bg-sidebar"] {
+  background-color: var(--bg-sidebar) !important;
+}
+
+/* =====================
+   GROUP HOVER INTERACTIONS
+   (for Rename/Delete buttons)
+   ===================== */
+.group .action-buttons,
+.project-item .action-buttons,
+.folder-item .action-buttons,
+.file-item .action-buttons {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.group:hover .action-buttons,
+.project-item:hover .action-buttons,
+.folder-item:hover .action-buttons,
+.file-item:hover .action-buttons {
+  opacity: 1 !important;
+  pointer-events: all;
+}
+
+.group-hover-opacity-100 {
+  transition: opacity 0.2s ease;
+}
+
+/* =====================
+   SIDEBAR ITEM STATES
+   ===================== */
+.project-item > div,
+.folder-item > div,
+.file-item > div {
+  color: #c0c0d0 !important;
+  border-radius: 8px;
+}
+
+.project-item > div:hover,
+.folder-item > div:hover,
+.file-item > div:hover {
+  background-color: var(--hover-bg) !important;
+  color: #ffffff !important;
+}
+
+.active-item {
+  background: var(--active-bg) !important;
+  color: var(--active-text) !important;
+  font-weight: 500;
+}
+
+.active-item span {
+  color: var(--active-text) !important;
+}
+
+/* =====================
+   GLASSMORPHISM CARD
+   ===================== */
+.glass-card {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color) !important;
+}
+
+.glass-input {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #fff !important;
+}
+
+.glass-input::placeholder {
+  color: rgba(255,255,255,0.35) !important;
+}
+
+.glass-input:focus {
+  background: rgba(255,255,255,0.09) !important;
+  border-color: #0dcaf0 !important;
+  box-shadow: 0 0 0 2px rgba(13, 202, 240, 0.2) !important;
+}
+
+/* =====================
+   SHADOWS
+   ===================== */
+.shadow-premium {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.shadow-info {
+  box-shadow: 0 0 12px rgba(13, 202, 240, 0.3);
+}
+
+/* =====================
+   ANIMATIONS
+   ===================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade, .animate-fade-in { animation: fadeIn 0.25s ease forwards; }
+.animate-slide-down { animation: slideDown 0.2s ease forwards; }
+.animate-scale, .scale-in { animation: scaleIn 0.2s ease forwards; }
+
+/* =====================
+   HOVER SCALE BUTTONS
+   ===================== */
+.hover-scale {
+  transition: transform 0.15s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.2);
+}
+
+/* =====================
+   CUSTOM SCROLLBAR
+   ===================== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 202, 240, 0.4);
+}
+
+/* =====================
+   TYPOGRAPHY HELPERS
+   ===================== */
+.tracking-tight  { letter-spacing: -0.02em; }
+.tracking-widest { letter-spacing: 0.12em; }
+.x-small         { font-size: 0.65rem; }
+
+/* =====================
+   CHAT BUBBLES
+   ===================== */
+.chat-bubble {
+  max-width: 80%;
+  border-radius: 1.25rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.chat-bubble-user {
+  background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 0.25rem;
+  box-shadow: 0 4px 15px rgba(13,110,253,0.3);
+}
+
+.chat-bubble-ai {
+  background: rgba(255,255,255,0.07);
+  color: #e0e0e0;
+  align-self: flex-start;
+  border-bottom-left-radius: 0.25rem;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* =====================
+   SIDEBAR LINK LEGACY
+   ===================== */
+.sidebar-link {
+  color: #a0a0b0;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+  color: #0dcaf0;
+  background-color: rgba(13, 202, 240, 0.1);
+}
+
+/* =====================
+   UPLOAD DROPZONE
+   ===================== */
+.upload-dropzone {
+  border: 2px dashed rgba(255,255,255,0.15) !important;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.25s;
+  cursor: pointer;
+  background: rgba(255,255,255,0.02);
+}
+
+.upload-dropzone:hover {
+  border-color: #0dcaf0 !important;
+  background: rgba(13, 202, 240, 0.05) !important;
+}
+
+/* =====================
+   LOGO BOX
+   ===================== */
+.logo-box {
+  width: 36px;
+  height: 36px;
+}
+
+/* =====================
+   BREADCRUMB
+   ===================== */
+.breadcrumb-item + .breadcrumb-item::before {
+  color: #555;
+}
+
+/* =====================
+   LAYOUT
+   ===================== */
+.bg-darker {
+  background-color: #0a0a12 !important;
+}
+
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
