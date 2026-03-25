@@ -85,12 +85,14 @@ def extract_text_from_pdf(content: bytes) -> List[dict]:
             })
     return pages_data
 
-def query_rag(query: str, project_id: Optional[str] = None, folder_id: Optional[str] = None):
+def query_rag(query: str, project_id: Optional[str] = None, folder_id: Optional[str] = None, file_id: Optional[str] = None):
     """
     Search vector DB with metadata filters.
     """
     filter_dict = {}
-    if folder_id:
+    if file_id:
+        filter_dict["file_id"] = str(file_id)
+    elif folder_id:
         filter_dict["folder_id"] = str(folder_id)
     elif project_id:
         filter_dict["project_id"] = str(project_id)

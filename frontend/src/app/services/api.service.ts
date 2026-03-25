@@ -99,6 +99,7 @@ export class ApiService {
     message: string, 
     projectId?: number, 
     folderId?: number, 
+    fileId?: number,
     sessionId?: number 
   }): Observable<any> {
     console.log('ApiService: Querying chat', options.message);
@@ -106,6 +107,7 @@ export class ApiService {
       message: options.message,
       project_id: options.projectId,
       folder_id: options.folderId,
+      file_id: options.fileId,
       session_id: options.sessionId
     });
   }
@@ -116,5 +118,13 @@ export class ApiService {
 
   getChatHistory(sessionId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/chat/sessions/${sessionId}/messages/`);
+  }
+
+  deleteChatSession(sessionId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/chat/sessions/${sessionId}`);
+  }
+
+  updateChatSession(sessionId: number, title: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/chat/sessions/${sessionId}`, { title });
   }
 }

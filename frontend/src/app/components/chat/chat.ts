@@ -2,7 +2,7 @@ import { Component, Input, signal, OnChanges, SimpleChanges, ViewChild, ElementR
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ApiService, Project, Folder } from '../../services/api.service';
+import { ApiService, Project, Folder, FileResponse } from '../../services/api.service';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -19,6 +19,7 @@ interface Message {
 export class ChatComponent implements OnChanges {
   @Input() project?: Project;
   @Input() folder?: Folder;
+  @Input() file?: FileResponse;
 
   messages = signal<Message[]>([]);
   userInput = '';
@@ -53,9 +54,13 @@ export class ChatComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (this.project) {
+    if (changes['project'] && this.project && !this.sessionId) {
       this.loadLatestSession();
-    } else {
+    }
+    
+    // If context changed but we have a session, we stay in it (RAG filter will update automatically)
+    // Unless project was cleared
+    if (!this.project) {
       this.messages.set([]);
       this.sessionId = undefined;
     }
@@ -141,6 +146,7 @@ export class ChatComponent implements OnChanges {
       message: queryPost.message,
       projectId: queryPost.project_id,
       folderId: queryPost.folder_id,
+      fileId: this.file?.id,
       sessionId: queryPost.session_id
     }).subscribe({
       next: (res) => {
@@ -163,5 +169,15 @@ export class ChatComponent implements OnChanges {
         setTimeout(() => this.scrollToBottomIfNear(), 50);
       }
     });
+  }
+
+  newChat() {
+    this.messages.set([]);
+    this.sessionId = undefined;
+  }
+
+  setSession(sessionId: number) {
+    this.sessionId = sessionId;
+    this.loadHistory(sessionId);
   }
 }

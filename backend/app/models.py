@@ -48,6 +48,9 @@ class ChatSession(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     project_id = Column(Integer, ForeignKey("rag_system.projects.id"))
+    title = Column(String, nullable=True)
+    context_type = Column(String, default="project") # "project", "folder", or "file"
+    context_id = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     project = relationship("Project", back_populates="chat_sessions")

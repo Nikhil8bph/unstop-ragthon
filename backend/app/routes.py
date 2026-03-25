@@ -113,6 +113,7 @@ class ChatQuery(BaseModel):
     message: str
     project_id: Optional[int] = None
     folder_id: Optional[int] = None
+    file_id: Optional[int] = None
     session_id: Optional[int] = None
 
 @router.post("/chat/query/")
@@ -122,12 +123,27 @@ def query_chat(query: ChatQuery, db: Session = Depends(get_db)):
         if query.session_id:
             db_session = db.query(models.ChatSession).filter(models.ChatSession.id == query.session_id).first()
             if not db_session:
-                db_session = models.ChatSession(project_id=query.project_id)
+                # Fallback create if provided session_id doesn't exist
+                context_type = "file" if query.file_id else ("folder" if query.folder_id else "project")
+                context_id = query.file_id or query.folder_id or query.project_id
+                db_session = models.ChatSession(
+                    project_id=query.project_id,
+                    context_type=context_type,
+                    context_id=context_id,
+                    title=query.message[:50] + "..." if len(query.message) > 50 else query.message
+                )
                 db.add(db_session)
                 db.commit()
                 db.refresh(db_session)
         else:
-            db_session = models.ChatSession(project_id=query.project_id)
+            context_type = "file" if query.file_id else ("folder" if query.folder_id else "project")
+            context_id = query.file_id or query.folder_id or query.project_id
+            db_session = models.ChatSession(
+                project_id=query.project_id,
+                context_type=context_type,
+                context_id=context_id,
+                title=query.message[:50] + "..." if len(query.message) > 50 else query.message
+            )
             db.add(db_session)
             db.commit()
             db.refresh(db_session)
@@ -144,7 +160,8 @@ def query_chat(query: ChatQuery, db: Session = Depends(get_db)):
             results = rag.query_rag(
                 query.message,
                 project_id=str(query.project_id) if query.project_id else None,
-                folder_id=str(query.folder_id) if query.folder_id else None
+                folder_id=str(query.folder_id) if query.folder_id else None,
+                file_id=str(query.file_id) if query.file_id else None
             )
             context_text = "\n\n".join([doc.page_content for doc in results])
         except Exception as e:
@@ -194,6 +211,30 @@ def query_chat(query: ChatQuery, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Chat query error: {e}")
         raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
+
+@router.delete("/chat/sessions/{session_id}")
+def delete_chat_session(session_id: int, db: Session = Depends(get_db)):
+    db_session = db.query(models.ChatSession).filter(models.ChatSession.id == session_id).first()
+    if not db_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # Relationship cascade takes care of messages usually, but we'll let SQLAlchemy handle it
+    db.delete(db_session)
+    db.commit()
+    return {"message": "Session deleted"}
+
+@router.patch("/chat/sessions/{session_id}", response_model=schemas.ChatSession)
+def update_chat_session(session_id: int, session_data: schemas.ChatSessionCreate, db: Session = Depends(get_db)):
+    db_session = db.query(models.ChatSession).filter(models.ChatSession.id == session_id).first()
+    if not db_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    if session_data.title:
+        db_session.title = session_data.title
+    
+    db.commit()
+    db.refresh(db_session)
+    return db_session
 
 @router.post("/files/upload/", response_model=schemas.FileResponse)
 async def upload_file(

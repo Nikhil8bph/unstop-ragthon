@@ -117,6 +117,39 @@
         </div>
       </div>
     </div>
+
+    <!-- Chat History Section -->
+    <div *ngIf="selectedProjectId" class="mb-4 border-top border-secondary pt-4 mt-3 animate-fade-in">
+        <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+          <h6 class="text-uppercase small mb-0 fw-bold text-info tracking-widest">CHAT HISTORY</h6>
+          <button class="btn btn-sm btn-outline-info rounded-circle shadow-info scale-in" (click)="requestNewChat()" title="Start New Chat">
+            <i class="bi bi-chat-left-plus"></i>
+          </button>
+        </div>
+  
+        <div class="list-group list-group-flush gap-1">
+          <div *ngFor="let s of chatSessions()" class="folder-item mb-1">
+            <div (click)="onSelectSession(s)"
+                 class="d-flex align-items-center px-2 py-2 rounded-3 position-relative"
+                 style="cursor: pointer;">
+              <i class="bi bi-chat-dots me-2 fs-6 text-info opacity-75"></i>
+              <div class="d-flex flex-column flex-grow-1 overflow-hidden">
+                <span class="small text-truncate" style="color: #c8c8d8;">{{ s.title || 'Untitled Chat' }}</span>
+                <span class="x-small text-secondary fw-normal">{{ s.created_at | date:'MMM d, h:mm a' }}</span>
+              </div>
+              
+              <div class="action-buttons d-flex gap-1">
+                 <button (click)="renameSession($event, s)" class="btn btn-link btn-sm text-info p-0 px-1 hover-scale" title="Rename Chat"><i class="bi bi-pencil"></i></button>
+                 <button (click)="deleteSession($event, s)" class="btn btn-link btn-sm text-danger p-0 px-1 hover-scale" title="Delete Chat"><i class="bi bi-trash3"></i></button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="chatSessions().length === 0" class="text-center py-3 opacity-25">
+            <i class="bi bi-chat-square-text fs-2 mb-2 d-block"></i>
+            <span class="x-small">No recent chats</span>
+          </div>
+        </div>
+    </div>
   </div>
 
   <div class="mt-auto pt-3 border-top border-secondary text-center">

@@ -9,7 +9,7 @@ import { AppPdfViewerComponent } from '../pdf-viewer/pdf-viewer';
 import { ApiService, Project, Folder, FileResponse } from '../../services/api.service';
 
 export interface ModalData {
-  type: 'project' | 'folder' | 'file';
+  type: 'project' | 'folder' | 'file' | 'session';
   action: 'rename' | 'delete';
   item: any;
   newName?: string;
@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit {
   selectedFile = signal<FileResponse | undefined>(undefined);
   
   @ViewChild(SidebarComponent) sidebar!: SidebarComponent;
+  @ViewChild(ChatComponent) chat!: ChatComponent;
 
   pdfUrl = signal<string | undefined>(undefined);
   pdfPage = signal<number>(1);
@@ -155,11 +156,11 @@ export class DashboardComponent implements OnInit {
     this.pdfPage.set(1);
   }
 
-  openRenameModal(event: {type: 'project' | 'folder' | 'file', item: any}) {
-    this.activeModal.set({ type: event.type, action: 'rename', item: event.item, newName: event.item.name || event.item.filename });
+  openRenameModal(event: {type: 'project' | 'folder' | 'file' | 'session', item: any}) {
+    this.activeModal.set({ type: event.type, action: 'rename', item: event.item, newName: event.item.name || event.item.filename || event.item.title });
   }
 
-  openDeleteModal(event: {type: 'project' | 'folder' | 'file', item: any}) {
+  openDeleteModal(event: {type: 'project' | 'folder' | 'file' | 'session', item: any}) {
     this.activeModal.set({ type: event.type, action: 'delete', item: event.item });
   }
 
@@ -177,6 +178,8 @@ export class DashboardComponent implements OnInit {
         this.apiService.updateProject(modal.item.id, name).subscribe(() => this.finishModal());
       } else if (modal.type === 'file') {
         this.apiService.renameFile(modal.item.id, name).subscribe(() => this.finishModal());
+      } else if (modal.type === 'session') {
+        this.apiService.updateChatSession(modal.item.id, name).subscribe(() => this.finishModal());
       } else {
         this.finishModal();
       }
@@ -187,6 +190,8 @@ export class DashboardComponent implements OnInit {
         this.apiService.deleteFolder(modal.item.id).subscribe(() => this.finishModal(true));
       } else if (modal.type === 'file') {
         this.apiService.deleteFile(modal.item.id).subscribe(() => this.finishModal(true));
+      } else if (modal.type === 'session') {
+        this.apiService.deleteChatSession(modal.item.id).subscribe(() => this.finishModal());
       }
     }
   }
@@ -209,5 +214,17 @@ export class DashboardComponent implements OnInit {
 
   onUploadComplete() {
     if (this.sidebar) this.sidebar.refreshFiles();
+  }
+
+  onSessionSelected(session: any) {
+    if (this.chat) {
+      this.chat.setSession(session.id);
+    }
+  }
+
+  onNewChatRequested() {
+    if (this.chat) {
+      this.chat.newChat();
+    }
   }
 }

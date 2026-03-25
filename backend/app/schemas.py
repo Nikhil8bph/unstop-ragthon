@@ -56,6 +56,9 @@ class ChatMessage(ChatMessageBase):
 
 class ChatSessionBase(BaseModel):
     project_id: int
+    title: Optional[str] = None
+    context_type: Optional[str] = "project"
+    context_id: Optional[int] = None
 
 class ChatSessionCreate(ChatSessionBase):
     pass

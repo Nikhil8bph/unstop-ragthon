@@ -15,13 +15,16 @@ export class SidebarComponent implements OnInit {
   projects = signal<Project[]>([]);
   folders = signal<Folder[]>([]);
   files = signal<FileResponse[]>([]);
+  chatSessions = signal<any[]>([]);
   
   @Output() projectSelected = new EventEmitter<Project>();
   @Output() folderSelected = new EventEmitter<Folder>();
   @Output() fileSelected = new EventEmitter<FileResponse>();
 
-  @Output() openRename = new EventEmitter<{type: 'project' | 'folder' | 'file', item: any}>();
-  @Output() openDelete = new EventEmitter<{type: 'project' | 'folder' | 'file', item: any}>();
+  @Output() openRename = new EventEmitter<{type: 'project' | 'folder' | 'file' | 'session', item: any}>();
+  @Output() openDelete = new EventEmitter<{type: 'project' | 'folder' | 'file' | 'session', item: any}>();
+  @Output() sessionSelected = new EventEmitter<any>();
+  @Output() newChatRequested = new EventEmitter<void>();
 
   selectedProjectId?: number;
   selectedFolderId?: number;
@@ -51,6 +54,31 @@ export class SidebarComponent implements OnInit {
     this.apiService.getFolders(project.id).subscribe(fols => {
       this.folders.set(fols);
     });
+    this.loadChatSessions(project.id);
+  }
+
+  loadChatSessions(projectId: number) {
+    this.apiService.getChatSessions(projectId).subscribe(sessions => {
+      this.chatSessions.set(sessions.reverse()); // Latest first
+    });
+  }
+
+  onSelectSession(session: any) {
+    this.sessionSelected.emit(session);
+  }
+
+  requestNewChat() {
+    this.newChatRequested.emit();
+  }
+
+  deleteSession(event: Event, session: any) {
+    event.stopPropagation();
+    this.openDelete.emit({ type: 'session', item: session });
+  }
+
+  renameSession(event: Event, session: any) {
+    event.stopPropagation();
+    this.openRename.emit({ type: 'session', item: session });
   }
 
   onSelectFolder(folder: Folder) {

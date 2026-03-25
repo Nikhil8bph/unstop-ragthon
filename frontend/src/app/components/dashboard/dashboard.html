@@ -5,6 +5,8 @@
       (projectSelected)="onProjectSelected($event)" 
       (folderSelected)="onFolderSelected($event)"
       (fileSelected)="onFileSelected($event)"
+      (sessionSelected)="onSessionSelected($event)"
+      (newChatRequested)="onNewChatRequested()"
       (openRename)="openRenameModal($event)"
       (openDelete)="openDeleteModal($event)">
     </app-sidebar>
@@ -70,9 +72,8 @@
           <app-upload [folder]="selectedFolder()" (uploadComplete)="onUploadComplete()"></app-upload>
         </div>
 
-        <!-- Chat (fills remaining space) -->
         <div class="flex-grow-1 overflow-hidden" style="min-height: 0;">
-          <app-chat [project]="selectedProject()" [folder]="selectedFolder()"></app-chat>
+          <app-chat [project]="selectedProject()" [folder]="selectedFolder()" [file]="selectedFile()"></app-chat>
         </div>
       </div>
 
